@@ -11,6 +11,7 @@ import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
+import com.agonyengine.service.RoomFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -51,6 +52,7 @@ public class WebSocketResource {
     private ActorRepository actorRepository;
     private InvokerService invokerService;
     private CommService commService;
+    private RoomFactory roomFactory;
     private BodyGenerator bodyGenerator;
     private List<String> greeting;
 
@@ -64,7 +66,8 @@ public class WebSocketResource {
         ActorRepository actorRepository,
         InvokerService invokerService,
         CommService commService,
-        BodyGenerator bodyGenerator) {
+        BodyGenerator bodyGenerator,
+        RoomFactory roomFactory) {
 
         this.applicationVersion = applicationVersion;
         this.applicationBootDate = applicationBootDate;
@@ -75,6 +78,7 @@ public class WebSocketResource {
         this.invokerService = invokerService;
         this.commService = commService;
         this.bodyGenerator = bodyGenerator;
+        this.roomFactory = roomFactory;
 
         InputStream greetingInputStream = WebSocketResource.class.getResourceAsStream("/greeting.txt");
         BufferedReader greetingReader = new BufferedReader(new InputStreamReader(greetingInputStream));
@@ -92,14 +96,8 @@ public class WebSocketResource {
             .orElseThrow(() -> new NoSuchActorException("Actor not found: " + actorUuid.toString()));
 
         // Create a Room if the game doesn't have one already.
-        if (roomRepository.findAll().isEmpty()) {
-            Room room = new Room();
-
-            room.getLocation().setX(0L);
-            room.getLocation().setY(0L);
-            room.getLocation().setZ(0L);
-
-            roomRepository.save(room);
+        if (roomRepository.count() == 0) {
+            roomFactory.get(0, 0, 0);
         }
 
         // Attach an inventory if the Actor doesn't have one.

@@ -17,6 +17,7 @@ import com.agonyengine.repository.VerbRepository;
 import com.agonyengine.resource.exception.NoSuchActorException;
 import com.agonyengine.service.CommService;
 import com.agonyengine.service.InvokerService;
+import com.agonyengine.service.RoomFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -95,6 +96,9 @@ public class WebSocketResourceTest {
     private CommService commService;
 
     @Mock
+    private RoomFactory roomFactory;
+
+    @Mock
     private BodyGenerator bodyGenerator;
 
     @Captor
@@ -161,7 +165,8 @@ public class WebSocketResourceTest {
             actorRepository,
             invokerService,
             commService,
-            bodyGenerator);
+            bodyGenerator,
+            roomFactory);
     }
 
     @SuppressWarnings("unchecked")
