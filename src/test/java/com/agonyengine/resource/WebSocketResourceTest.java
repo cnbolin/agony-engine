@@ -137,6 +137,7 @@ public class WebSocketResourceTest {
         when(session.getAttribute(eq("remoteIpAddress"))).thenReturn("10.11.12.13");
         when(roomRepository.findAll()).thenReturn(Collections.singletonList(startRoom));
         when(roomRepository.findByLocationXAndLocationYAndLocationZ(0L, 0L, 0L)).thenReturn(Optional.of(startRoom));
+        when(roomFactory.get(0L, 0L, 0L)).thenReturn(startRoom);
 
         when(actorRepository.save(any(Actor.class))).thenAnswer(i -> {
             Actor a = i.getArgument(0);

@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class RoomFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomFactory.class);
@@ -21,13 +24,14 @@ public class RoomFactory {
     public Room get(long x, long y, long z) {
         return roomRepository
             .findByLocationXAndLocationYAndLocationZ(x, y, z)
-            .orElse(generateTile(x, y, z));
+            .orElseGet(() -> generateTile(x, y, z));
     }
 
     private Room generateTile(long x, long y, long z) {
         long centerX = computeTileCenter(x);
         long centerY = computeTileCenter(y);
         Room queried = null;
+        List<Room> generated = new ArrayList<>();
 
         for (long x1 = centerX - 1; x1 <= centerX + 1; x1++) {
             for (long y1 = centerY - 1; y1 <= centerY + 1; y1++) {
@@ -37,7 +41,7 @@ public class RoomFactory {
                 room.getLocation().setY(y1);
                 room.getLocation().setZ(z);
 
-                room = roomRepository.save(room);
+                generated.add(room);
 
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Generated room: ({}, {}, {})",
@@ -57,16 +61,12 @@ public class RoomFactory {
             throw new IllegalStateException("Failed to generate requested tile!");
         }
 
+        roomRepository.saveAll(generated);
+
         return queried;
     }
 
     static long computeTileCenter(long coordinate) {
-        long center = TILE_SIZE * (long)Math.floor((coordinate + 1) / TILE_SIZEf);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Computed tile center: {} -> {}", coordinate, center);
-        }
-
-        return center;
+        return TILE_SIZE * (long)Math.floor((coordinate + 1) / TILE_SIZEf);
     }
 }

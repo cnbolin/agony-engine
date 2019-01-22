@@ -46,24 +46,21 @@ public class MoveCommand {
             return;
         }
 
-        Room currentRoom = roomRepository
-            .findById(actor.getRoomId())
-            .orElse(null);
+        Room destinationRoom;
 
-        if (currentRoom == null) {
-            output.append("[black]You are floating in the void, and unable to move!");
-            return;
-        }
+        try {
+            Room currentRoom = roomRepository
+                .findById(actor.getRoomId())
+                .orElseThrow(() -> new NullPointerException("[black]You are floating in the void, unable to move!"));
 
-        Room destinationRoom = roomRepository
-            .findByLocationXAndLocationYAndLocationZ(
-                currentRoom.getLocation().getX() + direction.getX(),
-                currentRoom.getLocation().getY() + direction.getY(),
-                currentRoom.getLocation().getZ()
-            ).orElse(null);
-
-        if (destinationRoom == null) {
-            output.append("[default]Alas, you cannot go that way.");
+            destinationRoom = roomRepository
+                .findByLocationXAndLocationYAndLocationZ(
+                    currentRoom.getLocation().getX() + direction.getX(),
+                    currentRoom.getLocation().getY() + direction.getY(),
+                    currentRoom.getLocation().getZ()
+                ).orElseThrow(() -> new NullPointerException("[default]Alas, you cannot go that way."));
+        } catch (NullPointerException e) {
+            output.append(e.getMessage());
             return;
         }
 

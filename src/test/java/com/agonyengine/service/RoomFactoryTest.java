@@ -22,7 +22,7 @@ public class RoomFactoryTest {
     private RoomRepository roomRepository;
 
     @Captor
-    private ArgumentCaptor<Room> roomCaptor;
+    private ArgumentCaptor<List<Room>> roomListCaptor;
 
     private RoomFactory roomFactory;
 
@@ -153,9 +153,9 @@ public class RoomFactoryTest {
         assertEquals(queryY, (long)result.getLocation().getY());
         assertEquals(queryZ, (long)result.getLocation().getZ());
 
-        verify(roomRepository, atLeastOnce()).save(roomCaptor.capture());
+        verify(roomRepository).saveAll(roomListCaptor.capture());
 
-        List<Room> generatedRooms = roomCaptor.getAllValues();
+        List<Room> generatedRooms = roomListCaptor.getValue();
 
         assertEquals(9, generatedRooms.size());
 

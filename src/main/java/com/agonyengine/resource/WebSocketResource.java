@@ -95,11 +95,6 @@ public class WebSocketResource {
         Actor actor = actorRepository.findById(UUID.fromString(actorId))
             .orElseThrow(() -> new NoSuchActorException("Actor not found: " + actorUuid.toString()));
 
-        // Create a Room if the game doesn't have one already.
-        if (roomRepository.count() == 0) {
-            roomFactory.get(0, 0, 0);
-        }
-
         // Attach an inventory if the Actor doesn't have one.
         if (actor.getInventoryId() == null) {
             Room room = new Room();
@@ -145,9 +140,7 @@ public class WebSocketResource {
         actor.getConnection().setRemoteIpAddress(session.getAttribute("remoteIpAddress"));
 
         if (actor.getRoomId() == null) {
-            Room startRoom = roomRepository
-                .findByLocationXAndLocationYAndLocationZ(0L, 0L, 0L)
-                .orElseThrow(() -> new NullPointerException("No start room!"));
+            Room startRoom = roomFactory.get(0L, 0L, 0L);
 
             actor.setRoomId(startRoom.getId());
 
@@ -232,7 +225,7 @@ public class WebSocketResource {
             return sessionRepository.findById(sessionId);
         }
 
-        return null;
+        throw new NullPointerException("Could not extract Spring session ID from STOMP header!");
     }
 
     private String getStompSessionId(Message<byte[]> message) {

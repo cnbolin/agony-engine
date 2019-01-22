@@ -6,6 +6,7 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
+import com.agonyengine.service.RoomFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -31,6 +32,9 @@ public class LookCommandTest {
     private RoomRepository roomRepository;
 
     @Mock
+    private RoomFactory roomFactory;
+
+    @Mock
     private CommService commService;
 
     private List<Direction> directions = new ArrayList<>();
@@ -44,6 +48,7 @@ public class LookCommandTest {
         lookCommand = new LookCommand(
             actorRepository,
             roomRepository,
+            roomFactory,
             commService,
             directions
         );

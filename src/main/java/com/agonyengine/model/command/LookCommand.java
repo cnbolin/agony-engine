@@ -8,6 +8,7 @@ import com.agonyengine.model.stomp.GameOutput;
 import com.agonyengine.repository.ActorRepository;
 import com.agonyengine.repository.RoomRepository;
 import com.agonyengine.service.CommService;
+import com.agonyengine.service.RoomFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -22,6 +23,7 @@ import static java.util.stream.Collectors.joining;
 public class LookCommand {
     private ActorRepository actorRepository;
     private RoomRepository roomRepository;
+    private RoomFactory roomFactory;
     private CommService commService;
     private List<Direction> directions;
 
@@ -29,11 +31,13 @@ public class LookCommand {
     public LookCommand(
         ActorRepository actorRepository,
         RoomRepository roomRepository,
+        RoomFactory roomFactory,
         CommService commservice,
         List<Direction> directions) {
 
         this.actorRepository = actorRepository;
         this.roomRepository = roomRepository;
+        this.roomFactory = roomFactory;
         this.commService = commservice;
         this.directions = directions;
     }
@@ -46,22 +50,31 @@ public class LookCommand {
             return;
         }
 
-        Room room = roomRepository.findById(actor.getRoomId()).orElse(null);
+        Room room;
 
-        if (room == null) {
-            output.append("[black]You are floating in the void. There is nothing to see here.");
+        try {
+            room = roomRepository
+                .findById(actor.getRoomId())
+                .orElseThrow(() -> new NullPointerException("[black]You are floating in the void. There is nothing to see here."));
+        } catch (NullPointerException e) {
+            output.append(e.getMessage());
             return;
         }
 
-        output.append(String.format("[yellow]%s", "A Room"));
+        output.append(String.format("[yellow]%s", room.getLocation()));
         output.append(String.format("[default]%s", "This is a placeholder for the room description."));
 
         output.append(directions.stream()
-            .filter(direction -> roomRepository.findByLocationXAndLocationYAndLocationZ(
-                room.getLocation().getX() + direction.getX(),
-                room.getLocation().getY() + direction.getY(),
-                room.getLocation().getZ() + direction.getZ())
-                .isPresent())
+            .filter(direction -> {
+                Room neighbor = roomFactory.get(
+                    room.getLocation().getX() + direction.getX(),
+                    room.getLocation().getY() + direction.getY(),
+                    room.getLocation().getZ() + direction.getZ());
+
+                // TODO filter out impassable rooms
+
+                return neighbor != null;
+            })
             .map(Direction::getName)
             .collect(joining(" ", "[cyan]Exits: ", "")));
 
