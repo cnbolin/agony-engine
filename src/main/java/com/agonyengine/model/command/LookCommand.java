@@ -62,7 +62,7 @@ public class LookCommand {
         }
 
         output.append(String.format("[yellow]%s", room.getLocation()));
-        output.append(String.format("[default]%s", "This is a placeholder for the room description."));
+        output.append(String.format("[default]%s", "The byte here is " + room.getTile() + "."));
 
         output.append(directions.stream()
             .filter(direction -> {

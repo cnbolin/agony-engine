@@ -3,7 +3,6 @@ package com.agonyengine.model.map;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -11,16 +10,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class Room {
+public class Tile {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Embedded
-    private Location location = new Location();
-    private Byte tile = null;
+    // TODO rename this to something before committing... category, shape, pattern, mask...?
+    private byte[] biomes = new byte[9];
 
     public UUID getId() {
         return id;
@@ -30,28 +28,20 @@ public class Room {
         this.id = id;
     }
 
-    public Location getLocation() {
-        return location;
+    public byte[] getBiomes() {
+        return biomes;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public Byte getTile() {
-        return tile;
-    }
-
-    public void setTile(Byte tile) {
-        this.tile = tile;
+    public void setBiomes(byte[] biomes) {
+        this.biomes = biomes;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Room)) return false;
-        Room room = (Room) o;
-        return Objects.equals(getId(), room.getId());
+        if (!(o instanceof Tile)) return false;
+        Tile tile = (Tile) o;
+        return Objects.equals(getId(), tile.getId());
     }
 
     @Override
